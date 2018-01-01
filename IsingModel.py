@@ -3,7 +3,7 @@ import numpy as np
 from numpy.random import rand
 import scipy.constants
 
-T = 273.0
+T = 273.14
 k = scipy.constants.k
 beta = 1.0/k*T
 
@@ -16,10 +16,8 @@ def initialise(n):
 def metropolis(state,beta,n):
     for i in range(n):
         for j in range(n):
-            a = np.random.randint(0,n)
-            b = np.random.randint(0,n)
-            spin_ij = state[a,b] #considering the spin of a random point in the latticr
-            spin_neighbours = state[(a+1)%n,b] + state[(a-1)%n,b] + state[a,(b+1)%n] + state[a,(b+1)%n] #considering spin of the neighbours #by using modulo n, periodic boundary conditions can be established
+            spin_ij = state[i,j] #considering the spin of a random point in the latticr
+            spin_neighbours = state[(i+1)%n,j] + state[(i-1)%n,j] + state[i,(j+1)%n] + state[i,(j+1)%n] #considering spin of the neighbours #by using modulo n, periodic boundary conditions can be established
             hamil = spin_ij*spin_neighbours  #assuming J = 1, I will find appropriate value for later update
             hamil_flip = -spin_ij*spin_neighbours  #hamiltonian for i,j if spin is flipped
             dE = hamil_flip-hamil
@@ -28,11 +26,11 @@ def metropolis(state,beta,n):
             #here we compare the Boltzmann distribution to a random integer to determine whether or not the spin will flip
             elif np.exp(-dE*beta) > rand():
                 spin_ij *= -1.0
-            state[a,b] = spin_ij
+            state[i,j] = spin_ij
     return state
                         
-n=10
-nsteps = 2**10
+n=100
+nsteps = 2**7
 
 state = initialise(n)
 print (state)
@@ -42,4 +40,6 @@ for i in range(nsteps):
     result = metropolis(state,beta,n)
     
 print (result)
+f = plt.figure(figsize=(5,5))
+plt.imshow(result)
 
