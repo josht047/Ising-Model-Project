@@ -14,25 +14,27 @@ def initialise(n):
 
 #function to use metropolis algorithm on lattice
 def metropolis(state,beta,n):
-    for i in range(n):
-        for j in range(n):
-            a = np.random.randint(0,n)
-            b = np.random.randint(0,n)
-            spin_ij = state[a,b] #considering the spin of a random point in the latticr
-            spin_neighbours = state[(a+1)%n,b] + state[(a-1)%n,b] + state[a,(b+1)%n] + state[a,(b+1)%n] #considering spin of the neighbours #by using modulo n, periodic boundary conditions can be established
-            dE = 2*spin_ij*spin_neighbours
-            if dE < 0:
-                spin_ij *= -1.0
-            #here we compare the Boltzmann distribution to a random integer to determine whether or not the spin will flip
-            elif np.exp(-dE*beta) > rand():
-                spin_ij *= -1.0
-            state[a,b] = spin_ij
+    a = np.random.randint(0,n)
+    b = np.random.randint(0,n)
+    spin_ij = state[a,b] #considering the spin of a random point in the lattice
+    spin_neighbours = state[(a+1)%n,b] + state[(a-1)%n,b] + state[a,(b+1)%n] + state[a,(b+1)%n] #considering spin of the neighbours #by using modulo n, periodic boundary conditions can be established
+    dE = 2*spin_ij*spin_neighbours
+    if dE < 0:
+        spin_ij *= -1.0
+    #here we compare the probability to a random number between 0 and 1 to determine whether or not the spin will flip
+    elif np.exp(-dE*beta) > rand():
+        spin_ij *= -1.0
+    state[a,b] = spin_ij
     return state
 
-
+def plot(result):
+    plt.figure(figsize=(5,5))
+    plt.imshow(result)
+    
 #main function                      
-n = 2**6
-nsteps = 2*11
+n = 100
+nsteps = 1000000
+
 
 state = initialise(n)
 print (state)
@@ -40,8 +42,19 @@ print (state)
 #loop to repeatedly apply the algorithm to the lattice
 for i in range(nsteps):  
     result = metropolis(state,beta,n)
+    if i == 1:
+        plot(result)
+    if i == 100:
+        plot(result)
+    if i == 1000:
+        plot(result)
+    if i == 10000:
+        plot(result)
+    if i == 100000:
+        plot(result)
+    if i == 1000000:
+        plot(result)
+
     
 print (result)
-f = plt.figure(figsize=(5,5))
-plt.imshow(result)
-
+plot(result)
