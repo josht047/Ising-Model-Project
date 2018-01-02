@@ -18,9 +18,8 @@ def metropolis(state,beta,n):
     b = np.random.randint(0,n)
     spin_ij = state[a,b] #considering the spin of a random point in the lattice
     spin_neighbours = state[(a+1)%n,b] + state[(a-1)%n,b] + state[a,(b+1)%n] + state[a,(b+1)%n] #considering spin of the neighbours #by using modulo n, periodic boundary conditions can be established
-    hamil = -spin_ij*spin_neighbours + 5*spin_ij
-    hamil_flip = -1.0*hamil
-    dE = hamil_flip - hamil
+    hamil = -spin_ij*spin_neighbours - spin_ij
+    dE = -2*hamil #as dE = flipped Hamiltonian - Hamiltonian = -2*Hamiltonian
     if dE < 0:
         spin_ij *= -1.0
     #here we compare the probability to a random number between 0 and 1 to determine whether or not the spin will flip
@@ -30,9 +29,10 @@ def metropolis(state,beta,n):
     return state
 
 #function that plots the current spin state of the lattice when called
-def plot(result):
+def plot(result,i):
     plt.figure(figsize=(5,5))
     plt.imshow(result)
+    plt.title("n = %s" %i)
     
 #main function                      
 n = 100
@@ -45,15 +45,15 @@ print (state)
 for i in range(nsteps):  
     result = metropolis(state,beta,n)
     if i == 1:
-        plot(result)
-    if i == 100:
-        plot(result)
+        plot(result,i)
     if i == 1000:
-        plot(result)
+        plot(result,i)
+    if i == 5000:
+        plot(result,i)
     if i == 10000:
-        plot(result)
+        plot(result,i)
     if i == 100000:
-        plot(result)
+        plot(result,i)
     
 print (result)
-plot(result)
+plot(result,nsteps)
