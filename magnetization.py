@@ -9,6 +9,7 @@ def initialise_array(n):
     init = np.random.randint(2,size=(n,n))
     return 2*init -1   #as spin can be -1 or 1, but the previous line gives a random matrix of 0 and 1
 
+
 #function to use metropolis algorithm on lattice
 def metropolis(state, beta):
     a = np.random.randint(0,n)
@@ -23,7 +24,6 @@ def metropolis(state, beta):
     state[a,b] = spin_ij
     return state
 
-#function that plots the current spin state of the lattice when called
 
 #simple function to return total magnetisation of the lattice
 def find_mag(state):
@@ -39,25 +39,35 @@ def find_energy(state):
             neighbours = state[(i+1)%n,j] + state[(i-1)%n,j] + state[i,(j+1)%n] + state[i, (j-1)%n]
             energy += -spin_ij*neighbours
     return energy
-    
+  
+
 #defining necessary variables etc
-T = np.random.normal(2.26,0.5,2**5) #creating normal distribution around T_c to easier see change in magnetisation
+T = np.random.normal(2.26,0.65,2**7) #creating normal distribution around T_c to show change in properties
 T = T[(T>1.1) & (T<3.8)] #taking only values of T in a certain range
 
-n = 2**4
+n = 2**4 #dimension of lattice
 eqsteps = 500000 #number of steps to bring lattice to equilibrium
 compsteps = 100000 #number of steps for calculation of thermodynamic properties
-magnetisation = energy = susceptibility = specific_heat = []
+magnetisation = np.zeros(len(T))
+energy = np.zeros(len(T))
+susceptibility = np.zeros(len(T))
+specific_heat = np.zeros(len(T))
 
+#defining constants for use in for loop below
+c1 = 1.0/(compsteps*n*n)
+c2 = 1.0/(compsteps*compsteps*n*n)
 
 #main part of the code
 start_time = time.time() #timing code out of interest
 
 #loop to repeatedly apply the algorithm to the lattice
 for j in range(len(T)):
-    mag = ene = sus = spe = 0
+    mag = 0
+    ene = 0
+    sus = 0
+    spec = 0
     state = initialise_array(n)
-    beta = 1.0/T[j]
+    beta = 1.0/T[j] 
     
     for i in range(eqsteps): #system is brought to equilbrium 
         metropolis(state,beta)
@@ -68,46 +78,44 @@ for j in range(len(T)):
         e = find_energy(state)
         mag += m
         ene += e
-        sus += m**2
-        spe += e**2
+        sus += m*m
+        spec += e*e
         
-    magnetisation.append(mag/(compsteps*n*n))
-    energy.append(ene/(compsteps*n*n))
-    susceptibility.append(((mag/(compsteps*n*n))-(((mag)**2)/(compsteps*compsteps*n*n)))*beta)
-    specific_heat.append(((ene/(compsteps*n*n))-(((ene)**2)/(compsteps*compsteps*n*n)))*(beta**2))
+    magnetisation[j] = c1*mag
+    energy[j] = c1*ene
+    susceptibility[j] = (c1*sus - c2*mag*mag)/T[j]
+    specific_heat[j] = (c1*spec - c2*ene*ene)/(T[j]**2)
 
 print ("for loop took", (time.time() - start_time)/60, "minutes")
 
-fig = plt.figure()
+#creating one figure with all 4 plots using subplot from pyplot package 
+fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2,figsize=(18, 10)); # plot the calculated values    
 
-fig.add_subplot(122)
-plt.plot(T,np.fabs(magnetisation),'ro')
-plt.title('Magnetization against Temperature')
-plt.xlabel('Temperature (T) in J/k')
-plt.ylabel('Magnetisation')
-plt.ylim(-0.05,1.05)
+ax1.plot(T, energy, 'bo');
+ax1.set_xlabel("Temperature (T)", fontsize=15);
+ax1.set_ylabel("Energy ", fontsize=15);
+ax1.set_xticks(np.arange(1.1,3.8,0.25))
+ax1.axvline(x=2.269,color='k',alpha=0.7,linestyle='dashed')
 
-fig.add_subplot(222)
-plt.plot(T,np.fabs(energy),'ko')
-plt.title('Energy against Temperature')
-plt.xlabel('Temperature (T) in J/k')
-plt.ylabel('Energy')
+ax2.plot(T, np.fabs(magnetisation), 'ro');
+ax2.set_xlabel("Temperature (T)", fontsize=15);
+ax2.set_ylabel("Magnetization", fontsize=15);
+ax2.set_xticks(np.arange(1.1,3.8,0.25))
+ax2.axvline(x=2.269,color='k',alpha=0.7,linestyle='dashed')
 
-fig.add_subplot(322)
-plt.plot(T,np.fabs(susceptibility),'ro')
-plt.title('Susceptibility against Temperature')
-plt.xlabel('Temperature (T) in J/k')
-plt.ylabel('Susceptibility')
+ax3.plot(T, specific_heat, 'bo');
+ax3.set_xlabel("Temperature (T)", fontsize=15);
+ax3.set_ylabel("Specific Heat ", fontsize=15);
+ax3.set_xticks(np.arange(1.1,3.8,0.25))
+ax3.axvline(x=2.269,color='k',alpha=0.7,linestyle='dashed')
 
-fig.add_subplot(422)
-plt.plot(T,np.fabs(specific_heat),'ko')
-plt.title('Specific Heat against Temperature')
-plt.xlabel('Temperature (T) in J/k')
-plt.ylabel('Specific Heat')
+ax4.plot(T, susceptibility, 'ro');
+ax4.set_xlabel("Temperature (T)", fontsize=15);
+ax4.set_ylabel("Susceptibility", fontsize=15);
+ax4.set_xticks(np.arange(1.1,3.8,0.25))
+ax4.axvline(x=2.269,color='k',alpha=0.7,linestyle='dashed')
 
-plt.show()
-    
-    
+plt.show() 
     
     
     
