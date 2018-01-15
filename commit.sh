@@ -1,5 +1,7 @@
 #!/bin/sh
 
+#this script takes all of the new or modified files in the local repository and commits the changes to the remote git repository on github
+
 #change directory to the local folder
 cd /Users/Josh/Desktop/isingmodel 
 
