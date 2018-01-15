@@ -32,13 +32,15 @@ def find_mag(state):
   
 
 def find_energy(state):
-    energy = 0
+    energy = 0 #defining energy variable
+    #nested for loops to consider each point of lattice once
     for i in range(0,n):
         for j in range(0,n):
             spin_ij = state[i,j]
+            #sum of spin of nearest neighbours
             neighbours = state[(i+1)%n,j] + state[(i-1)%n,j] + state[i,(j+1)%n] + state[i, (j-1)%n]
             energy += -spin_ij*neighbours
-    return energy
+    return energy/2
   
 
 #defining necessary variables etc
@@ -47,7 +49,7 @@ T = T[(T>1.1) & (T<3.8)] #taking only values of T in a certain range
 
 n = 2**4 #dimension of lattice
 eqsteps = 500000 #number of steps to bring lattice to equilibrium
-compsteps = 100000 #number of steps for calculation of thermodynamic properties
+compsteps = 200000 #number of steps for calculation of thermodynamic properties
 magnetisation = np.zeros(len(T))
 energy = np.zeros(len(T))
 susceptibility = np.zeros(len(T))
@@ -62,6 +64,7 @@ start_time = time.time() #timing code out of interest
 
 #loop to repeatedly apply the algorithm to the lattice
 for j in range(len(T)):
+    #initialising variables for various properties
     mag = 0
     ene = 0
     sus = 0
@@ -71,7 +74,7 @@ for j in range(len(T)):
     
     for i in range(eqsteps): #system is brought to equilbrium 
         metropolis(state,beta)
-            
+        
     for i in range(compsteps):
         metropolis(state,beta)
         m = find_mag(state)
